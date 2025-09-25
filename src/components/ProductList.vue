@@ -173,7 +173,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, watch } from 'vue'
+import { ref, reactive, computed, watch, onMounted } from 'vue'
 
 const loading = ref(false)
 watch(loading, val => {
@@ -196,7 +196,7 @@ const decreaseQuantity = (product) => {
   if (!existing) return
 
   existing.cantidad--
-
+  product.stock++
   // Buscar el producto original y aumentar su stock
   const prodOriginal = props.products.find(p => p.id === product.id)
   if (prodOriginal) prodOriginal.stock++
@@ -214,6 +214,19 @@ const props = defineProps({
 const search = ref('')
 const expanded = reactive({})
 const cart = ref([])
+
+// Cargar carrito guardado al iniciar
+onMounted(() => {
+  const savedCart = localStorage.getItem('cart')
+  if (savedCart) {
+    cart.value = JSON.parse(savedCart)
+  }
+})
+
+// Guardar carrito cada vez que cambie
+watch(cart, (newCart) => {
+  localStorage.setItem('cart', JSON.stringify(newCart))
+}, { deep: true })
 const cartOpen = ref(false)
 
 const filteredProducts = computed(() => {
